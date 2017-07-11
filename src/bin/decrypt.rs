@@ -1,8 +1,10 @@
+extern crate data_encoding;
 use std::env;
 use std::io::{self, Read};
+use data_encoding::hex;
 
-fn decrypt(encrypted_message: &[u8], key_str: &str) -> String {
-	String::from_utf8(encrypted_message.iter().cloned().zip(key_str.bytes().cycle()).map(|(message_byte, key)| message_byte ^ key).collect()).unwrap()
+fn decrypt(e_msg: &[u8], key: &str) -> String {
+	String::from_utf8(e_msg.iter().cloned().zip(key.bytes().cycle()).map(|(msg_byte, key_byte)| msg_byte ^ key_byte).collect()).unwrap()
 }
 
 fn main() {
@@ -10,8 +12,8 @@ fn main() {
 		let mut stdin = io::stdin();
 		let mut buffer = String::new();
 		stdin.read_to_string(&mut buffer).unwrap();
-		let encrypted_message: Vec<_> = buffer.trim().split(",").map(|s| s.trim().parse().unwrap()).collect();
-		let decrypted_string = decrypt(&encrypted_message, &key);
+		let e_msg = hex::decode(buffer.trim().as_ref()).unwrap();
+		let decrypted_string = decrypt(&e_msg, &key);
 		print!("{}", decrypted_string);
 	} else {
 		println!("Give key pls.");
